@@ -307,7 +307,62 @@ static String[] monthName = { "January", "February", "March",
 
 ## 4. 동적 배열
 
+앞서 우리는 부분적으로 가득 찬 배열을 사용하여 게임의 플레이어 목록을 저장하고 게임이 진행되는 동안 리스트를 늘리거나 줄일 수 있는 방법에 논의했다. 리스트는 프로그램이 실행되는 동안 크기가 변경된다는 점에서 **"동적"** 이다. 동적 리스트는 매우 일반적이므로 개념을 표현하기 위해 클래스를 작성하는 것을 고려해 볼 수도 있다. 클래스를 작성하면 유사한 데이터 구조를 사용하랴고 할 떄마다 동일한 코드를 반복하지 않아도 된다. 우리는 크기가 변경될 수 있다는 점을 제외하면 배열과 유사한 것을 원한다. 동적 배열에서 수행할 수 있는 작업에 대해 생각해 보자. 일부 필수적이고 유용한 작업에는 다음이 포함된다.
+
+- 배열 끝에 항목 추가
+- 배열 지정된 위치에 있는 항목을 제거
+- 배열의 요소 중 하나의 값을 가져오기
+- 배열의 요소 중 하나의 값을 설정
+- 현재 배열에 있는 항목 수를 가져오기
+
+클래스를 디자인할 때 이러한 작업은 해당 클래스의 인스턴스 메서드가 된다. 동적 배열의 항목은 부분적으로 전체 배열 패턴을 사용하여 실제로 일반 배열에 저장된다. 우리가 알고 있는 것을 활용하면 클래스를 작성하는 것이 어렵지 않다. 존재하지 않는 배열 요소에 엑세스하려고 할 때 무엇을 해야 할지 결정해야 한다. 이 경우 범위를 벗어난 인덱스 예외를 발생시키는 것이 자연스럽다. 배열의 항목이 `int` 유형이라 가정한다.
+
+```java
+import java.util.Arrays;
+
+public class DynamicArrayOfInt {
+
+    private int[] items = new int[8];  
+    private int itemCt;
+    
+    public int get(int index) {
+        if (index < 0 || index >= itemCt)
+            throw new ArrayIndexOutOfBoundsException("Illegal index, " + index);
+        return items[index];
+    }
+
+    public void set(int index, int item) {
+        if (index < 0 || index >= itemCt)
+            throw new ArrayIndexOutOfBoundsException("Illegal index, " + index);
+        items[index] = item;
+    }
+    
+    public int size() {
+        return itemCt;
+    }
+    
+    public void add(int item) {
+        if (itemCt == items.length)
+            items = Arrays.copyOf(items, 2 * items.length);
+        items[itemCt] = item;
+        itemCt++;
+    }
+    
+    public void remove(int index) {
+        if (index < 0 || index >= itemCt)
+            throw new ArrayIndexOutOfBoundsException("Illegal index, " + index);
+        for (int j = index + 1; j < itemCt; j++)
+            items[j - 1] = items[j];
+        itemCt--;
+    }
+}
+```
+
+`items` 배열의 원래 크기가 8인 이유를 제외하면 여기에 있는 모든 것이 명확해야 한다. 실제로 숫자 8은 임의적이며 클래스의 기능에 영향을 주지 않는다. 모든 양의 정수는 작동하지만 배열이 매우 크게 시작하는 것은 의미가 없다. 항목 수가 많아지면 필요에 따라 배열이 늘어난다. 
+
+예제에서는 부분적으로 전체 `int` 배열을 사용하여 입력 순서의 역순으로 숫자 리스트를 print했다. 해당 프로그램에서 길이가 100인 일반 배열을 사용하여 숫자를 저장했다. 특정 프로그램 실행에서 배열의 크기가 너무 크거나 너무 작아서 예외가 발생할 수 있다. 이제 프로그램은 합리적인 수의 입력에 맞춰 조정되는 `DynamicArrayOfInt`를 사용하여 작성할 수 있다. 동적 데이터 구조의 크기는 프로그램에 사용 가능한 메모리 양에 의해서만 제한되는 모든 양의 데이터에 적응할 수 있다.
 
 
+이것은 좋은 예이지만 실제 문제가 있다. `String`의 동적 배열을 갖고 싶다고 가정해 본다. `DynamicArrayOfInt` 객체를 사용하여 문자열을 저장할 수 없으므로 완전히 새로운 클래스인 `DynamicArrayOfString`을 작성해야 하는 것 처럼 보인다. 게임에 플레이어를 저장하기 위해 동적 배열을 원한다면 `DynamicArrayOfPlayer` 클래스가 필요하다. 등등 가능한 모든 유형의 데이터에 대해 동적 배열 클래스를 작성해야 하는 것 같다. Java에는 해결책이 있다. 이 클래스는 `ArrayList`라고 하며 다음 섹션에서 살펴본다.
 
 
