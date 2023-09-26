@@ -172,6 +172,226 @@ Scanner를 할당하는 명령문은 `try` 단어 뒤에 괄호 안에 표시된
 
 ## 3. 예외 던지기
 
+프로그램이 의도적으로 예외를 발생시키는 것이 타당한 경우가 있다. 이는 프로그램이 일종의 예외 또는 오류 조건을 발견했지만 문제가 발견된 시점에서 오류를 처리할 합리적인 방법이 없는 경우이다. 프로그램은 프로그램의 다른 부분이 예외를 포착하고 처리할 것이라는 희망으로 예외를 발생시킬 수 있다. 이는 `throw` 문을 사용하여 수행할 수 있다. 섹션 4.3.8에서 이미 확인했다. 
+
+```java
+throw exception-object;
+```
+
+**exception-object**는 `Throwable`의 하위 클래스 중 하나에 속하는 객체여야 한다. 일반적으로 `Exception`의 하위 클래스 중 하나에 속한다. 대부분의 경우 `new` 연산자를 사용하여 새로 생성된 객체이다. 
+
+```java
+throw new ArithmeticException("Division by zero");
+```
+
+생성자의 매개 변수는 예외 객체의 오류 메시지가 된다. `e`가 객체를 참조하는 경우 `e.getMessage()`를 호출하여 오류 메시지를 검색할 수 있다. 그러면 프로그래머가 굳이 예외를 발생시켜야 하는 이유는 무엇인가? `int` 유형인 경우 0으로 나누면 실제로 `ArithmeticException`가 발생한다. 그러나 부동 소수점 숫자를 사용한 산술 연산에서는 예외가 발생하지 않는다. 대신 특수 값 `Double.NaN`이 사용된다. 불법적인 작업의 결과를 나타내는 데 사용된다. 어떤 상황에서든 실수를 0으로 나눌 때 `ArithmeticException`을 발생시키는 것을 선호할 수 있다.
+
+예외는 시스템이나 `throw` 문에 의해 발생할 수 있다. 두 경우 모두 예외는 정확히 동일한 방식으로 처리된다. `try` 문 내에서 예외가 발생했다고 가정한다. 해당 `try`문에 해당 유형의 예외를 처리하는 `catch`절이 있으면 컴퓨터는 `catch` 절로 점프하여 실행한다. 예외가 **처리(handled)된다.** 예외를 처리한 후 컴퓨터는 `try`문의 `finally`(있는 경우)절을 실행한다. 그런 다음 `try` 다음에 이어지는 나머지 프로그램에서 정상적으로 계속된다. 예외가 즉시 발견되어 처리되지 않으면 예외 처리가 계속된다.
+
+서브 루틴 실행 중에 예외가 발생하고 동일한 서브 루틴에서 예외가 처리되지 않으면 서브 루틴이 종료된다. (보류 중인 `finally`절이 실행 된 후) 그런 다음 해당 서브 루틴을 호출한 루틴이 예외를 처리할 기회를 얻는다. 즉, 적절한 `catch` 절이 있는 `try`문 내에서 서브루틴이 호출된 경우 해당 `catch`절이 실행되고 프로그램은 거기서부터 정상적으로 계속된다. 다시 말하자면, 두 번째 루틴이 예외를 처리하지 않으면 두 번째 루틴도 종료되고 이를 호출한 루틴이 예외가 발생하면 다음 샷을 얻는다. 예외는 처리되지 않고 전체 서브 루틴 호출 체인을 통과하는 경우에만 프로그램을 중단시킨다. 이를 "호출 스택 해제(unwinding the call stack)"라고 한다.
+
+예외를 생성할 수 있는 서브 루틴은 루틴 헤더에 `throws exception-class-name` 절을 추가해 이 사실을 알릴 수 있다.
+
+```java
+/**
+ * 이차 방정식의 두 근 중 더 큰 값을 반환합니다.
+ * A*x*x + B*x + C = 0(근이 있는 경우). A == 0 또는
+ * 판별식 B*B - 4*A*C가 음수인 경우 예외
+ * IllegalArgumentException 유형이 발생합니다.
+ */
+static public double root( double A, double B, double C ) 
+                              throws IllegalArgumentException {
+    if (A == 0) {
+        throw new IllegalArgumentException("A can't be zero.");
+    }
+    else {
+        double disc = B*B - 4*A*C;
+        if (disc < 0)
+            throw new IllegalArgumentException("Discriminant < zero.");
+        return  (-B + Math.sqrt(disc)) / (2*A);
+    }
+}
+```
+
+이전 섹션에서 설명한 대로 이 서브 루틴의 계산에는 `A != 0` 및 `B*B-4*A*C >= 0` 조건이 있다. 이러한 전제 조건 중 하나가 위반하면 서브 루틴에서 `IllegalArgumentException` 유형의 예외가 발생한다. 서브 루틴에서 잘못된 조건이 발견되면 예외를 던지는 것이 합리적인 응답인 경우가 많다. 서브 루틴을 호출한 프로그램이 오류를 처리하는 좋은 방법을 알고 있는 경우 예외를 포착할 수 있다. 그렇지 않으면 프로그램이 중단되고 프로그래머는 프로그램을 수정해야 한다는 것을 알게 된다.
+
+서브 루틴 헤더의 `throws` 절은 쉼표로 구분하여 여러 가지 다른 유형의 예외를 선언할 수 있다. 
+
+```java
+oid processArray(int[] A) throws NullPointerException, 
+                                         ArrayIndexOutOfBoundsException { ...
+```
+
+
+## 4. 필수 예외 처리
+
+앞의 예에서 서브 루틴 `root()`가 `IllegalArgumentException`을 발생시킬 수 있다고 선언하는 것은 이 루틴의 잠재적인 독자를 위한 예의일 뿐이다. 이는 `IllegalArgumentException` 처리가 "필수"가 아니기 때문이다. 루틴은 가능성을 알리지 않고 `IllegalArgumentException`을 발생시킬 수 있다. 프로그래머가 `NullPointerException` 유형의 예외를 포착하거나 무시하도록 선택할 수 있는 것처럼 해당 루틴을 호출하는 프로그램은 자유롭게 예외를 포착하거나 무시할 수 있다.
+
+필수 처리가 필요한 예외 클래스의 경우 상황이 다르다. 서브 루틴이 그러한 예외를 발생시킬 수 있는 경우 해당 사실은 루틴 정의의 `throws`절에서 발표되어야 한다. 그렇게 하지 못하면 컴파일러에서 보고되는 구문 오류이다. 필수 처리가 필요한 예외를 **checked exceptions** 이라고 한다. 컴파일러는 그러한 예외가 프로그램에 의해 처리되는지 확인한다.
+
+서브루틴 본문의 일부 명령문이 필수 처리가 필요한 checked exception를 생성할 수 있다고 가정한다. 명령문은 예외를 직접 발생시키는 `throw`문 일수도 있고, 예외를 발생시킬 수 있는 서브 루틴에 대한 호출일 수도 있다. 두 경우 모두 예외를 **처리해야 한다.** 이는 두 가지 방법 중 하나로 수행할 수 있다. 첫 번째 방법은 예외를 처리하는 `catch`절이 있는 `try`문에 명령문을 배치하는 것이다. 이 경우 예외는 서브 루틴 내에서 처리되므로 서브 루틴 호출자는 예외를 볼 수 없다. 두 번째 방법은 서브 루틴이 예외를 발생시킬 수 있다고 선언하는 것이다. 이것은 `throws`을 추가하여 수행된다. 절을 서브루틴 헤더에 추가하여 서브 루틴이 실행될 때 예외가 생성될 수 있다는 가능성을 호출자에게 경고한다. 호출자는 차례로 `try`문에서 예외를 처리하거나 헤더에 예외를 선언해야 한다.
+
+`Error` 또는 `RuntimeException`의 하위 클래스가 아닌 모든 예외 클래스에는 예외 처리가 필수이다. 이러한 checked exception은 일반적으로 프로그래머가 제어할 수 없는 조건을 나타낸다. 예를 들어 잘못된 입력이나 사용자가 취한 불법적인 작업을 나타낼 수 있다. 이러한 오류를 피할 수 있는 방법은 없으므로 이를 처리할 수 있는 견고한 프로그램을 준비해야 한다. Java 설계에서는 프로그래머가 이러한 오류의 가능성을 무시하는 것이 불가능하다.
+
+checked exception 중에서 Java의 입력/출력 루틴을 사용할 때 발생할 수 있는 몇 가지 예외가 있다. 즉, 예외 처리에 대해 이해하지 못하면 이러한 루틴을 사용할 수도 없다.
+
+
+## 5. 예외가 있는 프로그래밍
+
+강력한 프로그램을 작성하는 데 예외를 사용할 수 있다. 이는 견고성에 대한 조직적이고 구조화된 접근 방식을 제공한다. 예외가 없으면 가능한 다양한 오류 조건을 테스트하는 `if`문으로 인해 프로그램이 복잡해질 수 있다. 예외를 제외하면 모든 일반적인 경우를 처리하는 알고리즘을 깔끔하게 구현하는 것이 가능해진다. 예외적인 경우는 `try`문의 `catch`절 같이 다른 곳에서 처리될 수 있다.
+
+프로그램에서 예외 상황이 발생하고 이를 즉시 처리할 수 없는 경우 프로그램에서 예외가 발생할 수 있다. 어떤 경우에는 `IllegalArgumentException` 또는 `IOException`과 같은 Java의 사전 정의된 클래스 중 하나에 속하는 예외를 발생시키는 것이 합리적이다. 그러나 예외 조건을 적절하게 나타내는 표준 클래스가 없는 경우 프로그래머는 새 예외 클래스를 정의할 수 있다. 새 클래스는 표준 클래스 `Throwable` 또는 해당 하위 클래스 중 하나를 확장해야 한다. 일반적으로 프로그래머가 필수 예외 처리를 요구하지 않으려면 새 클래스는 `RuntimeException`을 확장한다. 새로운 checked exception를 생성하려면 필수 처리가 필요한 경우 프로그래머는 `Exception`의 하위 클래스를 확장하거나 `Exception` 자체를 확장할 수 있다. 
+
+예를 들어 다음은 `Exception`을 확장하는 클래스이므로 예외 처리가 필수이다.
+
+```java
+public class ParseError extends Exception {
+    pulbic ParseError(String message) {
+        super(message);
+    }
+}
+```
+
+클래스에는 지정된 오류 메시지가 포함된 `ParseError` 객체를 생성할 수 있게 해주는 생성자만 포함되어 있다. `super(message)` 문은 슈퍼 클래스의 생성자 `Exception`을 호출한다. 물론 슈퍼 클래스에서 `getMessage()`, `printStackTrace()` 루틴을 상속한다. `e`가 `ParseError` 유형의 객체를 참조하는 경우 `e.getMessage()` 함수 호출은 생성자에 지정된 오류 메시지를 검색한다. 하지만 `ParseError` 클래스의 핵심은 단순히 존재한다는 것이다. `ParseError` 유형의 객체가 던져지면 특정 유형의 오류가 발생함을 나타낸다. 
+
+프로그램에서 `throw`문을 사용하여 `ParseError` 유형의 오류를 발생시킬 수 있다. `ParseError` 객체의 생성자는 오류 메시지를 지정해야 한다.
+
+```java
+throw new ParseError("Encountered an illegal negative number.");
+```
+
+또는 
+
+```java
+throw new ParseError("The word '" + word + "' is not a valid file name.");
+```
+
+`ParseError`는 `Exception`의 하위 클래스로 정의되므로 checked exception이다. 오류를 포착하는 `try`문에서 `throw` 문이 발생하지 않으면 서브 루틴 헤더에 `throws ParseError` 절을 추가하여 에러를 던질 수 있음을 선언해야 한다.
+
+```java
+void getUserData() throws ParseError {
+
+}
+```
+
+`ParseError`가 `Exception` 대신 `RuntimeException`의 하위 클래스로 정의된 경우 이는 필요하지 않다. 이 경우 `ParseError`는 예외를 확인하지 않기 때문이다.
+
+`ParseError`를 처리하려는 루틴은 `catch` 절과 함께 사용할 수 있다.
+
+```java
+try {
+    getUserData();
+    processUserData();
+}
+catch (ParseError pe) {
+    // handle the error    
+}
+```
+
+`ParseError`는 `Exception`의 하위 클래스 이므로 `catch`절은 `Exception` 유형의 다른 객체와 함께 포착된다.
+
+```java
+class ShipDestroyed extends RuntimeException { 
+    Ship ship;  // Which ship was destroyed.
+    int where_x, where_y;  // Location where ship was destroyed.
+    ShipDestroyed(String message, Ship s, int x, int y) {
+        super(message);
+        ship = s;
+        where_x = x;
+        where_y = y;
+    }
+}
+```
+
+여기서 `ShipDestroyed` 객체에는 오류 메시지와 파괴된 선박에 대한 일부 정보가 포함되어 있다. 
+
+```java
+if (userShip.isHit()) 
+    throw new ShipDestroyed("공격당함", userShip, xPos, yPos);
+```
+
+`ShipDestroyed` 객체가 나타내는 조건은 오류로 간주되지 않을 수도 있다. 이는 게임의 정상적인 흐름을 방해할 것으로 예상되는 것일 수도 있다. 때때로 예외를 사용하여 이러한 중단을 깔끔하게 처리할 수 있다.
+
+---
+
+예외를 발생시키는 기능은 둘 이상의 프로그램에서 사용되는 범용 메서드와 클래스를 작성하는 데 특히 유용하다. 이 경우, 메서드나 클래스를 작성하는 사람은 해당 메서드나 클래스가 어떻게 사용될지 정확히 알 수 없기 때뭉네 오류를 처리할 합리적인 방법이 없는 경우가 많다. 이러한 상황에서 프로그래머는 종종 오류 메시지를 인쇄하고 앞서 나가고 싶은 유혹을 느끼지만, 이는 나중에 예측할 수 없는 결과를 초래할 수 있으므로 거의 만족스럽지 않다. 오류 메시지를 인쇄하고 프로그램을 종료하는 것은 프로그램이 오류를 처리할 기회를 주지 않기 때문에 거의 나쁜 일이다.
+
+메서드를 호출하거나 클래스를 사용하는 프로그램은 오류가 발생했음을 알아야 한다. 예외를 지원하지 않은 언어에서 유일한 대안은 일부 특수 값을 반환하거나 일부 전역 변수의 값을 설정하여 오류가 발생했음을 나타내는 것이다. 섹션 8.2.2의 `readMeasurement()` 함수는 사용자의 입력이 잘못된 경우 -1을 반환한다. 그러나 이는 주 프로그램이 반환 값을 테스트하는 데 방해가 되는 경우에만 유용하다. 서브루틴이 호출될 때 마다 특별한 반환 값을 확인하는 것을 게으르게 만드는 것은 매우 쉽다. 그리고 이 경우에는 -1을 사용한다. 오류가 발생했다는 신호로 인해 음수 측정이 불가능해진다. 예외는 오류가 발생할 때 서브루틴이 반응하느 ㄴ더 깔끔한 방법이다.
+
+오류를 알리기 위해 특별한 반환 값 대신 예외를 사용하도록 `readMeasurement()` 함수를 수정하는 것은 쉽ㄴ다. 수정된 서브 루틴은 사용자 입력이 잘못된 경우 `ParseError`를 발생시킨다. 여기서 `ParseError`는 위에 정의된 `Exception`의 하위 클래스이다.
+
+```java
+public class A {
+
+    /**
+     * 한 줄의 입력에서 사용자의 입력 측정값을 읽습니다.
+     * 전제 조건: 입력 라인이 비어 있지 않아야 합니다.
+     * 사후조건 : 사용자의 입력이 정당한 경우 측정
+     *는 인치로 변환되어 반환됩니다.
+     * @throws 사용자의 입력이 올바르지 않으면 @throws ParseError가 발생합니다.
+     */
+    static double readMeasurement() throws ParseError {
+        
+        double inches;  // 사용자가 측정한 총 인치 수입니다.
+        double measurement;  // 한 번의 측정, "12마일"의 12와 같은 것입니다.
+        String units;       // 측정을 위해 지정된 단위, "마일"과 같은 것입니다.
+        char ch;  // 사용자 입력에서 다음 문자를 엿보는 데 사용됩니다.
+        inches = 0;  // 아직 읽은 인치가 없습니다.
+
+        skipBlanks();
+        ch = TextIO.peek();
+   
+        /* 라인에 더 많은 입력이 있는 한 측정값을 읽고
+            해당 인치 수를 변수 인치에 추가합니다. 만약
+            루프 중에 오류가 감지되면 즉시 서브루틴을 종료합니다.ParseError를 발생시킵니다 
+      . */
+        while (ch != '\n') {
+            /* 다음 측정값과 단위를 가져옵니다. 읽기 전에
+            무엇이든 읽을 수 있는 합법적인 값이 있는지 확인하세요. */
+            if ( ! Character.isDigit(ch) ) {
+                throw new ParseError("Expected to find a number, but found " + ch);
+            }
+            measurement = TextIO.getDouble();
+
+            skipBlanks();
+            if (TextIO.peek() == '\n') {
+                throw new ParseError("Missing unit of measure at end of line.");
+            }
+            units = TextIO.getWord();
+            units = units.toLowerCase();
+
+            /* 측정값을 인치로 변환하여 합계에 추가합니다. */
+            if (units.equals("inch")
+                    || units.equals("inches") || units.equals("in")) {
+                inches += measurement;
+            }
+            else if (units.equals("foot")
+                    || units.equals("feet") || units.equals("ft")) {
+                inches += measurement * 12;
+            }
+            else if (units.equals("yard")
+                    || units.equals("yards") || units.equals("yd")) {
+                inches += measurement * 36;
+            }
+            else if (units.equals("mile")
+                    || units.equals("miles") || units.equals("mi")) {
+                inches += measurement * 12 * 5280;
+            }
+            else {
+                throw new ParseError("\"" + units
+                        + "\" is not a legal unit of measure.");
+            }
+     
+            /* 줄의 다음 항목이 다음인지 확인하기 위해 미리 살펴보세요. */
+            skipBlanks();
+            ch = TextIO.peek();
+
+        } 
+
+        return inches;
+    } 
+}
+```
 
 
 
