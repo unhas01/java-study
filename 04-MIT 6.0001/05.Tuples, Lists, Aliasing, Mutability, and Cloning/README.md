@@ -72,6 +72,54 @@ L.append(5)
 
 <br>
 
+<details>
+    <summary> Punctuators </summary>
+
+### Punctuators란?
+
+프로그래밍 언어에서 사용되는 특수 문자나 기호, 프로그램의 구조를 형성하고 표현하는 데 사용된다. 
+
+[IBM Punctuators](https://www.ibm.com/docs/en/i/7.3?topic=tokens-punctuators-operators)
+> A punctuator is a token that has syntactic and semantic meaning to the compiler, but the exact significance depends on the context. A punctuator can also be a token that is used in the syntax of the preprocessor.
+
+> 펑츄에이터는 컴파일러에 대한 통사적, 의미적 의미를 가지는 토큰이지만 정확한 의미는 문맥에 따라 다릅니다. 또한 펑츄에이터는 전처리기의 구문에 사용되는 토큰이 될 수도 있습니다.
+
+#### Python에서 Punctuators 예시들
+
+- **콜론(:)**
+
+```python
+if a < 5:
+    print(a)
+```
+
+- **쉼표(,)**
+
+```python
+numbers = 1, 2, 3
+```
+
+- **괄호(())** : 메서드나 튜플 
+```python
+result = add(1, 2)
+```
+
+- **대괄호([])** : 리스트, 요소 접근
+```python
+li = [1, 2, 3]
+a = li[1]
+```
+
+- **점(.)** : 객체에 접근, 메서드 호출
+```python
+li [1, 2, 3]
+li.append(5)
+```
+
+</details>
+
+<br>
+
 **`+` 연산**
 
 - 더하기 연산자는 리스트를 변경하지 않는다.
