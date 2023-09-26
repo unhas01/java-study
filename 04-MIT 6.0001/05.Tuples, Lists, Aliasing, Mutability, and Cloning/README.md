@@ -206,7 +206,7 @@ L.pop()         # L = [1, 3, 7]
 
 리스트는 사람 객체와 같다. 별칭이 변경되면 모든 별칭이 변경된 객체를 가리킨다. 
 
-[aliases & clone 코드](./code/alias_list.ipynb)
+[aliases & clone 코드](./code/alias_clone_list.ipynb)
 
 <br>
 
