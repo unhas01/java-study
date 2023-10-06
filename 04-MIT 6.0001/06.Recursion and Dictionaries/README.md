@@ -44,17 +44,17 @@
 - `base case`가 있는지 확인하여 무한 재귀를 피해야 함
 - 큰 문제를 단순화 하는 게 목표이며, 여러 입력에 대해서도 동일하게 작동해야 함
 <details>
-<summary>Base case & Recursive case</summary>
+<summary> Base case & Recursive case</summary>
 
   `Base case`
 
   같은 형태의 더 작은 부분문제가 없고, 바로 답을 알 수 있는 경우
-  ex ) 0!
+  ex) 0!
 
   `Recursive case`
 
   재귀적으로 부분 문제를 풀 수 있는 경우
-  ex ) 10! 를 풀기 위해서 9!, 8!, 7! 등의 부분 문제를 만들어 풀어야 함
+  ex) 10! 를 풀기 위해서 9!, 8!, 7! 등의 부분 문제를 만들어 풀어야 함
 </details>
 
 ## Loop Algorithm → Recursion Algorithm
@@ -414,9 +414,9 @@ def isPal(s):
 ---
 
 ```python
-name = {'Ana', 'John', 'Denise'}
-grade = {'B', 'A+', 'A'}
-course = {2.00, 6.0001, 20.002}
+name = ['Ana', 'John', 'Denise']
+grade = ['B', 'A+', 'A']
+course = [2.00, 6.0001, 20.002]
 ```
 
 - 각각의 요소를 다른 리스트에 넣고, 같은 index에 있는 요소들을 하나의 묶음으로 봄
@@ -622,7 +622,7 @@ def fib_efficient(n, d):
 d = {1:1, 2:2}
 ```
 
-- 이미 값을 연산했는지 검색하고, 연산한 값들은 dictionary에 기록 **⇒ memorization**
+- 이미 값을 연산했는지 검색하고, 연산한 값들은 dictionary에 기록 **⇒ memoization**
 - 34의 피보나치를 얻기 위해서는 기존 코드였다면 1100만번이 넘는 연산이 필요하지만, dictionary를 이용한 코드에서는 65번의 연산으로 가능
 - dictionary는 데이터의 저장뿐만 아니라 중간 값이 변경되지 않을 때 활용하면 좋음
 
